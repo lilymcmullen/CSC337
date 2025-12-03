@@ -1,1 +1,2 @@
-CSC 337 final project - recipes
+CSC 337 final project - recipe hub
+

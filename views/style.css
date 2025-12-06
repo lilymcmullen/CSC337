@@ -1,0 +1,54 @@
+#title{
+    background-color: aliceblue;
+    height:70px;
+    padding: 25px;
+    text-align: left;
+    font-size: 45px;
+    font-weight: bold;
+    color: rgb(27, 145, 241);
+}
+#navlinks{
+    text-align: center;
+    font-size: 18px;
+}
+a{
+    padding: 15px;
+}
+.block{
+    background-color: whitesmoke;
+    text-align: left;
+    margin-block: 20px;
+    padding-block: 20px;
+    padding-inline: 20px;
+    color: rgb(27, 145, 241);
+}
+#footer{
+    background-color: aliceblue;
+    padding-block: 20px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+    color: rgb(27, 145, 241);
+}
+h1{
+    color: rgb(27, 145, 241);
+    text-align: left;
+    background-color: whitesmoke;
+}
+#main_content{
+    padding-block: 20px;
+    padding-inline: 20px;
+    color: rgb(27, 145, 241);
+}
+div button{
+    margin-top: 10px;
+}
+#subtitle{
+    position: relative; 
+    bottom: 50px;
+}
+#account-info{
+    float: right;
+    margin-top: -50px;
+    font-size: 18px;
+}

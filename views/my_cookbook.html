@@ -1,33 +1,103 @@
 <!DOCTYPE html>
 <html>
-    <title>My Cookbook</title>
-    <head>
-        <meta charset="UTF-8">
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <header>
-        <div>
-            <div id="title">Byte-Sized Bites</div>
-            <div id="account-info">
-                <a id="login" href="login.html" style="margin-right:8px;">Login</a>
-                <a id="register" href="register.html">Register</a>
-            </div>
-        </div>
+	<head>
+		<title>My Cookbook</title>
+		<meta charset="UTF-8" />
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<header>
+		<div>
+			<div id="title">Byte-Sized Bites</div>
+			<div id="account-info">
+				<a id="login" href="login.html" style="margin-right: 8px"
+					>Login</a
+				>
+				<a id="register" href="register.html">Register</a>
+			</div>
+		</div>
 
-        <div id="navlinks" class="block" style="margin-top:12px;">
-            <a href="index.html">Home</a>
-            <a href="recipes.html">Explore Recipes</a>
-            <a href="my_cookbook.html">My Cookbook</a>
-            <a href="recipe_form.html">Add a Recipe</a>
-        </div>
-    </header>
-    <body>
-        <h1>My Cookbook</h1>
-        <div id="main_content" class="block">
-            <div id="text_section">
-                <p>Welcome to your personal cookbook where you can view all your favorited recipes!</p>
-            </div>
-    </body>
-        <script>
-        </script>
+		<div id="navlinks" class="block" style="margin-top: 12px">
+			<a href="index.html">Home</a>
+			<a href="recipes.html">Explore Recipes</a>
+			<a href="my_cookbook.html">My Cookbook</a>
+			<a href="recipe_form.html">Add a Recipe</a>
+		</div>
+	</header>
+	<body>
+		<h1>My Cookbook</h1>
+		<div id="main_content" class="block">
+			<div id="text_section">
+				<p>
+					Welcome to your personal cookbook where you can view all
+					your favorited recipes!
+				</p>
+			</div>
+			<div id="cookbook_recipes" class="block">
+				<!-- Favorited recipes will be dynamically loaded here -->
+			</div>
+		</div>
+		<script>
+			async function loadCookbook() {
+				const token = localStorage.getItem("authToken");
+				if (!token) {
+					alert("Please log in to view your cookbook.");
+					return;
+				}
+
+				const response = await fetch("/favorites/list", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ token: token }),
+				});
+				const recipes = await response.json();
+
+				const cookbookDiv = document.getElementById("cookbook_recipes");
+				cookbookDiv.innerHTML = "";
+
+				recipes.forEach((recipe) => {
+					const recipeDiv = document.createElement("div");
+					recipeDiv.className = "recipe";
+
+					const title = document.createElement("h2");
+					title.textContent = recipe.recipe_name;
+					recipeDiv.appendChild(title);
+
+					const ingredients = document.createElement("p");
+					ingredients.innerHTML =
+						"<strong>Ingredients:</strong><br>" +
+						recipe.ingredients.replace(/\n/g, "<br>");
+					recipeDiv.appendChild(ingredients);
+
+					const instructions = document.createElement("p");
+					instructions.innerHTML =
+						"<strong>Instructions:</strong><br>" +
+						recipe.instructions.replace(/\n/g, "<br>");
+					recipeDiv.appendChild(instructions);
+
+					const removeButton = document.createElement("button");
+					removeButton.textContent = "Remove from Cookbook";
+					removeButton.onclick = async () => {
+						await fetch(`/favorites/remove`, {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								token: token,
+								recipe_id: recipe.id,
+							}),
+						});
+						alert("Recipe removed from your cookbook!");
+						loadCookbook();
+					};
+					recipeDiv.appendChild(removeButton);
+
+					cookbookDiv.appendChild(recipeDiv);
+				});
+			}
+			loadCookbook();
+		</script>
+	</body>
 </html>

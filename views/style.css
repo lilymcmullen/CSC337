@@ -52,3 +52,46 @@ div button{
     margin-top: -50px;
     font-size: 18px;
 }
+#recipes_list div{
+    border: 1px solid rgb(27, 145, 241);
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: white;
+}
+#recipes_list div button{
+    background-color: rgb(27, 145, 241);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
+#recipes_list div button:hover{
+    background-color: rgb(15, 90, 150);
+}
+form{
+    background-color: whitesmoke;
+    padding: 20px;
+    border: 1px solid rgb(27, 145, 241);
+}
+form button{
+    background-color: rgb(27, 145, 241);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
+form button:hover{
+    background-color: rgb(15, 90, 150);
+}
+input, textarea{
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid rgb(27, 145, 241);
+    box-sizing: border-box;
+}
+input:focus, textarea:focus{
+    border: 1px solid rgb(15, 90, 150);
+    outline: none;
+}

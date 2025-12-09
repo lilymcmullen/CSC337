@@ -65,15 +65,11 @@
 				});
 
 				if (response.ok) {
-					const data = await response.json();
-					const token = data.token;
-					localStorage.setItem("authToken", token);
+					localStorage.setItem("authToken", "logged-in");
 					localStorage.setItem("loggedInUser", username);
 					window.location.href = "/";
 				} else {
-					alert(
-						"Login failed. Please check your credentials and try again."
-					);
+					alert("Login failed. Please check your credentials and try again.");
 				}
 			}
 

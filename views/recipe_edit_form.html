@@ -1,96 +1,97 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Edit Recipe</title>
-        <meta charset="UTF-8" />
-        <link rel="stylesheet" href="style.css" />
-    </head>
-    <header>
-        <div>
-            <div id="title">Byte-Sized Bites</div>
-            <div id="account-info">
-                <a id="login" href="login.html" style="margin-right:8px;">Login</a>
-                <a id="register" href="register.html">Register</a>
-            </div>
-        </div>
+  <head>
+    <title>Edit Recipe</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <header>
+    <div>
+      <div id="title">Byte-Sized Bites</div>
+      <div id="account-info">
+        <a id="login" href="login.html" style="margin-right:8px;">Login</a>
+        <a id="register" href="register.html">Register</a>
+      </div>
+    </div>
 
-        <div id="navlinks" class="block" style="margin-top:12px;">
-            <a href="index.html">Home</a>
-            <a href="recipes.html">Explore Recipes</a>
-            <a href="my_cookbook.html">My Cookbook</a>
-            <a href="recipe_form.html">Add a Recipe</a>
-        </div>
-    </header>
-    <body>
-        <div id="main_content" class="block">
-            <div id="text_section">
-                <form id="recipe_form">
-                    <label for="recipe_name">Recipe Name:</label><br>
-                    <input type="text" id="recipe_name" name="recipe_name"><br><br>
+    <div id="navlinks" class="block" style="margin-top:12px;">
+      <a href="index.html">Home</a>
+      <a href="recipes.html">Explore Recipes</a>
+      <a href="my_cookbook.html">My Cookbook</a>
+      <a href="recipe_form.html">Add a Recipe</a>
+    </div>
+  </header>
+  <body>
+    <div id="main_content" class="block">
+      <div id="text_section">
+        <form id="recipe_form">
+          <label for="recipe_name">Recipe Name:</label><br>
+          <input type="text" id="recipe_name" name="recipe_name"><br><br>
 
-                    <label for="ingredients">Ingredients List and Quantity:</label><br>
-                    <textarea id="ingredients" name="ingredients" rows="4" cols="50"></textarea><br><br>
+          <label for="ingredients">Ingredients List and Quantity:</label><br>
+          <textarea id="ingredients" name="ingredients" rows="4" cols="50"></textarea><br><br>
 
-                    <label for="instructions">Instructions:</label><br>
-                    <textarea id="instructions" name="instructions" rows="6" cols="50"></textarea><br><br>
+          <label for="instructions">Instructions:</label><br>
+          <textarea id="instructions" name="instructions" rows="6" cols="50"></textarea><br><br>
 
-                    <button type="submit">Edit Recipe</button>
-                </form>
-            </div>
-        </div>
-        <script>
-            const urlParams = new URLSearchParams(window.location.search);
-            const recipeId = urlParams.get('id');
-            // populate form with existing recipe data
-            async function loadRecipeData() {
-                const response = await fetch(`/recipes/get?id=${recipeId}`);
-                if (response.ok) {
-                    const recipe = await response.json();
-                    document.getElementById("recipe_name").value = recipe.recipe_name;
-                    document.getElementById("ingredients").value = recipe.ingredients;
-                    document.getElementById("instructions").value = recipe.instructions;
-                } else {
-                    alert("Failed to load recipe data.");
-                }
-            }
-            loadRecipeData();
+          <button type="submit">Edit Recipe</button>
+        </form>
+      </div>
+    </div>
 
-            async function handleRecipeSubmit(event) {
-                event.preventDefault();
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const recipeId = urlParams.get('id');
 
-                const recipeName = document.getElementById("recipe_name").value;
-                const ingredients = document.getElementById("ingredients").value;
-                const instructions = document.getElementById("instructions").value;
+      // populate form with existing recipe data
+      async function loadRecipeData() {
+        const response = await fetch(`/recipes/id/?id=${recipeId}`);
+        if (response.ok) {
+          const recipe = await response.json();
+          document.getElementById("recipe_name").value = recipe.title;
+          document.getElementById("ingredients").value = recipe.ingredients;
+          document.getElementById("instructions").value = recipe.instructions;
+        } else {
+          alert("Failed to load recipe data.");
+        }
+      }
+      loadRecipeData();
 
-                const token = localStorage.getItem("authToken");
-                if (!token) {
-                    alert("Please log in to edit a recipe.");
-                    return;
-                }
+      async function handleRecipeSubmit(event) {
+        event.preventDefault();
 
-                const response = await fetch("/recipes/edit", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        id: recipeId,
-                        recipe_name: recipeName,
-                        ingredients: ingredients,
-                        instructions: instructions,
-                        token: token,
-                    }),
-                });
+        const recipeName = document.getElementById("recipe_name").value;
+        const ingredients = document.getElementById("ingredients").value;
+        const instructions = document.getElementById("instructions").value;
 
-                if (response.ok) {
-                    alert("Recipe edited successfully!");
-                } else {
-                    alert("Failed to edit recipe.");
-                }
-            }
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          alert("Please log in to edit a recipe.");
+          return;
+        }
 
-            document
-                .getElementById("recipe_form")
-                .addEventListener("submit", handleRecipeSubmit);
-        </script>
+        const response = await fetch(`/recipes/edit/?id=${recipeId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: recipeName,
+            ingredients: ingredients,
+            instructions: instructions
+          }),
+        });
+
+        if (response.ok) {
+          alert("Recipe edited successfully!");
+        } else {
+          alert("Failed to edit recipe.");
+        }
+      }
+
+      document
+        .getElementById("recipe_form")
+        .addEventListener("submit", handleRecipeSubmit);
+    </script>
+  </body>
 </html>

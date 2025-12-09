@@ -1,40 +1,48 @@
 const express = require('express');
 const router = express.Router();
-const Recipe = require('../models/Recipe');
+const path = require('path');
+const { ObjectId } = require('mongodb');
 const requireLogin = require('../middleware/requireLogin');
 
-// GET /recipes
+// GET /recipes - show recipes page
 router.get('/', (req, res) => {
-  res.sendFile(__dirname + '/../views/recipes.html');
+  res.sendFile(path.join(__dirname, '..', 'views', 'recipes.html'));
 });
 
-// GET /recipes/list - Get all recipes
+// GET /recipes/list - list all recipes
 router.get('/list', async (req, res) => {
   try {
-    const recipes = await Recipe.find().populate('userId', 'username');
-    res.json(recipes);
+    const recipes = req.app.locals.recipes;
+    const docs = await recipes.find({}).toArray();
+    res.json(docs);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Failed to fetch recipes' });
   }
 });
 
 // GET /recipes/create
 router.get('/create', (req, res) => {
-  res.sendFile(__dirname + '/../views/recipe_form.html');
+  res.sendFile(path.join(__dirname, '..', 'views', 'recipe_form.html'));
 });
 
 // POST /recipes/create
 router.post('/create', requireLogin, async (req, res) => {
-  const { title, category, ingredients, instructions, cuisine } = req.body;
+  const { title, ingredients, instructions } = req.body;
   
   try {
-    const recipe = new Recipe({
-      title, category, ingredients, instructions, cuisine,
-      userId: req.session.userId
-    });
-    await recipe.save();
-    res.json({ success: true, recipeId: recipe._id });
+    const recipes = req.app.locals.recipes;
+    const recipeDoc = {
+      title: title,
+      ingredients: ingredients,
+      instructions: instructions,
+      userId: new ObjectId(req.session.userId),
+    };
+
+    const result = await recipes.insertOne(recipeDoc);
+    res.json({ success: true, recipeId: result.insertedId });
   } catch (error) {
+    console.error(error);
     res.status(400).json({ error: 'Failed to create recipe' });
   }
 });
@@ -42,79 +50,79 @@ router.post('/create', requireLogin, async (req, res) => {
 // GET /recipes/id/?id=# - Get recipe by ID
 router.get('/id/', async (req, res) => {
   try {
-    const recipe = await Recipe.findById(req.query.id).populate('userId', 'username');
-    if (!recipe) return res.status(404).json({ error: 'Recipe not found' });
+    const id = req.query.id;
+    const recipes = req.app.locals.recipes;
+
+    const recipe = await recipes.findOne({ _id: new ObjectId(id) });
+    if (!recipe) {
+      return res.status(404).json({ error: 'Recipe not found' });
+    }
     res.json(recipe);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Failed to fetch recipe' });
   }
 });
 
 // GET /recipes/edit/?id=# - Show edit form
 router.get('/edit/', (req, res) => {
-  res.sendFile(__dirname + '/../views/recipe_edit_form.html');
+  res.sendFile(path.join(__dirname, '..', 'views', 'recipe_edit_form.html'));
 });
 
-// POST /recipes/edit/?id=# - Update recipe
+// POST /recipes/edit/?id=# - Update recipe (only owner can edit)
 router.post('/edit/', requireLogin, async (req, res) => {
-  const { title, category, ingredients, instructions, cuisine } = req.body;
-  
+  const { title, ingredients, instructions } = req.body;
+  const id = req.query.id;
+
   try {
-    const recipe = await Recipe.findById(req.query.id);
-    if (!recipe) return res.status(404).json({ error: 'Recipe not found' });
+    const recipes = req.app.locals.recipes;
+    const recipe = await recipes.findOne({ _id: new ObjectId(id) });
+
+    if (!recipe) {
+      return res.status(404).json({ error: 'Recipe not found' });
+    }
+
     if (recipe.userId.toString() !== req.session.userId.toString()) {
       return res.status(403).json({ error: 'Not authorized' });
     }
-    
-    recipe.title = title;
-    recipe.category = category;
-    recipe.ingredients = ingredients;
-    recipe.instructions = instructions;
-    recipe.cuisine = cuisine;
-    await recipe.save();
+
+    await recipes.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          title: title,
+          ingredients: ingredients,
+          instructions: instructions
+        }
+      }
+    );
+
     res.json({ success: true });
   } catch (error) {
+    console.error(error);
     res.status(400).json({ error: 'Failed to update recipe' });
   }
 });
 
-// POST /recipes/delete/?id=# - Delete recipe
+// POST /recipes/delete/?id=# - Delete recipe (only owner can)
 router.post('/delete/', requireLogin, async (req, res) => {
-  try {
-    const recipe = await Recipe.findById(req.query.id);
-    if (!recipe) return res.status(404).json({ error: 'Recipe not found' });
-    if (recipe.userId.toString() !== req.session.userId.toString()) {
-      return res.status(403).json({ error: 'Not authorized' });
-    }
-    await Recipe.findByIdAndDelete(req.query.id);
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to delete recipe' });
-  }
-});
+  const id = req.query.id;
 
-// POST /recipes/addReview/?id=# - Add review
-router.post('/addReview/', requireLogin, async (req, res) => {
-  const { reviewText, rating } = req.body;
-  
   try {
-    const recipe = await Recipe.findById(req.query.id);
-    if (!recipe) return res.status(404).json({ error: 'Recipe not found' });
-    
-    recipe.reviews.push({
-      userId: req.session.userId,
-      username: req.session.username,
-      reviewText,
-      rating: parseInt(rating)
+    const recipes = req.app.locals.recipes;
+    const result = await recipes.deleteOne({
+      _id: new ObjectId(id),
+      userId: new ObjectId(req.session.userId)
     });
-    
-    const totalRating = recipe.reviews.reduce((sum, r) => sum + r.rating, 0);
-    recipe.rating = (totalRating / recipe.reviews.length).toFixed(1);
-    
-    await recipe.save();
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Recipe not found or not authorized' });
+    }
+
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to add review' });
+    console.error(error);
+    res.status(500).json({ error: 'Failed to delete recipe' });
   }
 });
 

@@ -46,47 +46,57 @@
 				recipesList.innerHTML = "";
 
 				recipes.forEach((recipe) => {
-				const recipeDiv = document.createElement("div");
-				recipeDiv.className = "recipe";
+					const recipeDiv = document.createElement("div");
+					recipeDiv.className = "recipe";
 
-				const title = document.createElement("h2");
-				title.textContent = recipe.title;
-				recipeDiv.appendChild(title);
+					const title = document.createElement("h2");
+					title.textContent = recipe.title;
+					recipeDiv.appendChild(title);
 
-				const ingredients = document.createElement("p");
-				ingredients.innerHTML =
-					"<strong>Ingredients:</strong><br>" +
-					recipe.ingredients.replace(/\n/g, "<br>");
-				recipeDiv.appendChild(ingredients);
+					const ingredients = document.createElement("p");
+					ingredients.innerHTML =
+						"<strong>Ingredients:</strong><br>" +
+						recipe.ingredients.replace(/\n/g, "<br>");
+					recipeDiv.appendChild(ingredients);
 
-				const instructions = document.createElement("p");
-				instructions.innerHTML =
-					"<strong>Instructions:</strong><br>" +
-					recipe.instructions.replace(/\n/g, "<br>");
-				recipeDiv.appendChild(instructions);
+					const instructions = document.createElement("p");
+					instructions.innerHTML =
+						"<strong>Instructions:</strong><br>" +
+						recipe.instructions.replace(/\n/g, "<br>");
+					recipeDiv.appendChild(instructions);
 
-				const favoriteButton = document.createElement("button");
-				favoriteButton.textContent = "Add to Cookbook";
-				favoriteButton.onclick = async () => {
-					const token = localStorage.getItem("authToken");
-					if (!token) {
-					alert("Please log in to add recipes to your cookbook.");
-					return;
-					}
-					await fetch(`/favorites/add`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						recipeId: recipe._id,
-					}),
-					});
-					alert("Recipe added to your cookbook!");
-				};
-				recipeDiv.appendChild(favoriteButton);
+					const favoriteButton = document.createElement("button");
+					favoriteButton.textContent = "Add to Cookbook";
+					favoriteButton.onclick = async () => {
+						const token = localStorage.getItem("authToken");
+						if (!token) {
+							alert(
+								"Please log in to add recipes to your cookbook."
+							);
+							return;
+						}
+						await fetch(`/favorites/add`, {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								recipeId: recipe._id,
+							}),
+						});
+						alert("Recipe added to your cookbook!");
+					};
+					recipeDiv.appendChild(favoriteButton);
 
-				recipesList.appendChild(recipeDiv);
+					const editButton = document.createElement("button");
+					editButton.textContent = "Edit Recipe";
+					editButton.style.marginLeft = "8px";
+					editButton.onclick = () => {
+						window.location.href = `recipe_edit_form.html?id=${recipe._id}`;
+					};
+					recipeDiv.appendChild(editButton);
+
+					recipesList.appendChild(recipeDiv);
 				});
 			}
 

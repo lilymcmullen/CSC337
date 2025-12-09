@@ -32,7 +32,7 @@
 					your favorited recipes!
 				</p>
 			</div>
-			<div id="cookbook_recipes" class="block">
+			<div id="recipes_list" class="block">
 				<!-- Favorited recipes will be dynamically loaded here -->
 			</div>
 		</div>
@@ -53,47 +53,47 @@
 				});
 				const recipes = await response.json();
 
-				const cookbookDiv = document.getElementById("cookbook_recipes");
+				const cookbookDiv = document.getElementById("recipes_list");
 				cookbookDiv.innerHTML = "";
 
 				recipes.forEach((recipe) => {
-				const recipeDiv = document.createElement("div");
-				recipeDiv.className = "recipe";
+					const recipeDiv = document.createElement("div");
+					recipeDiv.className = "recipe";
 
-				const title = document.createElement("h2");
-				title.textContent = recipe.title;
-				recipeDiv.appendChild(title);
+					const title = document.createElement("h2");
+					title.textContent = recipe.title;
+					recipeDiv.appendChild(title);
 
-				const ingredients = document.createElement("p");
-				ingredients.innerHTML =
-					"<strong>Ingredients:</strong><br>" +
-					recipe.ingredients.replace(/\n/g, "<br>");
-				recipeDiv.appendChild(ingredients);
+					const ingredients = document.createElement("p");
+					ingredients.innerHTML =
+						"<strong>Ingredients:</strong><br>" +
+						recipe.ingredients.replace(/\n/g, "<br>");
+					recipeDiv.appendChild(ingredients);
 
-				const instructions = document.createElement("p");
-				instructions.innerHTML =
-					"<strong>Instructions:</strong><br>" +
-					recipe.instructions.replace(/\n/g, "<br>");
-				recipeDiv.appendChild(instructions);
+					const instructions = document.createElement("p");
+					instructions.innerHTML =
+						"<strong>Instructions:</strong><br>" +
+						recipe.instructions.replace(/\n/g, "<br>");
+					recipeDiv.appendChild(instructions);
 
-				const removeButton = document.createElement("button");
-				removeButton.textContent = "Remove from Cookbook";
-				removeButton.onclick = async () => {
-					await fetch(`/favorites/remove`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						recipeId: recipe._id,
-					}),
-					});
-					alert("Recipe removed from your cookbook!");
-					loadCookbook();
-				};
-				recipeDiv.appendChild(removeButton);
+					const removeButton = document.createElement("button");
+					removeButton.textContent = "Remove from Cookbook";
+					removeButton.onclick = async () => {
+						await fetch(`/favorites/remove`, {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								recipeId: recipe._id,
+							}),
+						});
+						alert("Recipe removed from your cookbook!");
+						loadCookbook();
+					};
+					recipeDiv.appendChild(removeButton);
 
-				cookbookDiv.appendChild(recipeDiv);
+					cookbookDiv.appendChild(recipeDiv);
 				});
 			}
 			loadCookbook();

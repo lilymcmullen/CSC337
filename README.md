@@ -31,7 +31,6 @@ Note: If code files are not separated into subfolders, organize them in the foll
 	style.css
 server.js
 README.md
-.gitignore
 package-lock.json
 package.json
 

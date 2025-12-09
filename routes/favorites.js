@@ -1,15 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const Favorite = require('../models/Favorite');
-const Recipe = require('../models/Recipe');
 const requireLogin = require('../middleware/requireLogin');
 
-//Show favorites page
+// GET /favorites - Show favorites page
 router.get('/', (req, res) => {
-  res.sendFile(__dirname + '/../views/favorites.html');
+  res.sendFile(__dirname + '/../views/my_cookbook.html');
 });
 
-//Get user's favorite recipes
+// POST /favorites/list - Get user's favorites
 router.post('/list', requireLogin, async (req, res) => {
   try {
     const favorites = await Favorite.find({ userId: req.session.userId })
@@ -25,23 +24,18 @@ router.post('/list', requireLogin, async (req, res) => {
   }
 });
 
-//Add recipe to favorites
+// POST /favorites/add - Add to favorites
 router.post('/add', requireLogin, async (req, res) => {
   const { recipeId } = req.body;
   
   try {
-    const recipe = await Recipe.findById(recipeId);
-    if (!recipe) {
-      return res.status(404).json({ error: 'Recipe not found' });
-    }
-    
-    const existingFavorite = await Favorite.findOne({
+    const existing = await Favorite.findOne({
       userId: req.session.userId,
       recipeId: recipeId
     });
     
-    if (existingFavorite) {
-      return res.status(400).json({ error: 'Recipe already in favorites' });
+    if (existing) {
+      return res.status(400).json({ error: 'Already in favorites' });
     }
     
     const favorite = new Favorite({
@@ -49,13 +43,13 @@ router.post('/add', requireLogin, async (req, res) => {
       recipeId: recipeId
     });
     await favorite.save();
-    res.json({ success: true, message: 'Recipe added to favorites' });
+    res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: 'Failed to add favorite' });
   }
 });
 
-//Remove recipe from favorites
+// POST /favorites/remove - Remove from favorites
 router.post('/remove', requireLogin, async (req, res) => {
   const { recipeId } = req.body;
   
@@ -65,11 +59,9 @@ router.post('/remove', requireLogin, async (req, res) => {
       recipeId: recipeId
     });
     
-    if (!result) {
-      return res.status(404).json({ error: 'Favorite not found' });
-    }
+    if (!result) return res.status(404).json({ error: 'Not in favorites' });
     
-    res.json({ success: true, message: 'Recipe removed from favorites' });
+    res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: 'Failed to remove favorite' });
   }

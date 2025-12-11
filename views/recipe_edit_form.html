@@ -96,6 +96,7 @@
 						headers: {
 							"Content-Type": "application/json",
 						},
+						credentials: "include"
 					}
 				);
 
@@ -130,6 +131,7 @@
 					headers: {
 						"Content-Type": "application/json",
 					},
+					credentials: "include",
 					body: JSON.stringify({
 						title: recipeName,
 						ingredients: ingredients,
